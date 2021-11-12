@@ -8,22 +8,23 @@
 #  5. You have rclone installed
 #  6. You are running python 3.8 and have run sudo apt install python3.8-venv -y
 #     Probably other python3 works, the assumption is that I can create a venv
+#  7. /opt is writeable by you without sudo
 
 # SETTINGS YOU MAY WANT TO ADJUST
 # How many projects to create
 # 100 SAs will be created in each project
 project_count=3
+# enter your google group address; if this is left empty you will be prompted for it
+google_group=""
 # If you have existing service accounts and want them merged in here
 # Enter a prefix or prefixes that can be used to identify them
 # alternative_prefixes="bing bang boing"
 alternative_prefixes=""
-# enter your google group address; if this is left empty you will be prompted for it
-google_group=""
 # If you have existing groups you want added to the shared drives
 # enter them here.
 # alternative_prefixes="google-accounts@bing.bang all-sas@bang.boing"
 alternative_groups=""
-# Shoudl we download the JSON files?
+# Should we download the JSON files?
 download_json=1
 # END USER SERVICEABLE PARTS
 
@@ -31,6 +32,8 @@ download_json=1
 # Seriously, leave them alone
 saf_dir=safire
 target_dir=/opt
+union_remote=test-union
+rclone_bin=/usr/bin/rclone
 # Explicitly targeting user home here
 config_file=~/safire/config.py
 prefix_file=~/safire/prefix_file
@@ -48,17 +51,29 @@ drives_to_create=~/safire/drive_create
 function preflight {
    echo "---------- verifying access prereqs"
 
-   if [[ "$(whoami)" == root ]]; then
+   if [[ "$(whoami)" != root ]]; then
+      echo "You're not root. CHECK"
+   else
       echo "Don't run this as root."
       echo "It stores files in the user home dir."
+      echo "---------- exiting with problems"
       exit 1
    fi
 
    if [ -w $target_dir ] ; then 
-      echo "$target_dir is writable." ; 
+      echo "$target_dir is writable. CHECK" ; 
    else
       echo "$target_dir is not writable." ; 
       echo "This script is assuming a standard cloudbox or saltbox system after preinstall." ; 
+      echo "---------- exiting with problems"
+      exit 1
+   fi
+
+   if [ -f $rclone_bin ] ; then 
+      echo "$rclone_bin is here. CHECK" ; 
+   else
+      echo "$rclone_bin is not installed." ; 
+      echo "---------- exiting with problems"
       exit 1
    fi
 
@@ -109,6 +124,10 @@ function first_half {
    echo "---------- This should display an error about 'Could not consume arg: --test'"
    ./safire.py --test
 
+   echo "---------- next step:"
+   echo "---------- copy your credentials JSON to $creds_file"
+   echo "---------- then run this script again."
+
 }
 
 function find_and_activate_safire() {
@@ -119,7 +138,7 @@ function find_and_activate_safire() {
 
 function do_safire_auth() {
    find_and_activate_safire
-   echo "---------- Running authentication; follow prompts "
+   echo "---------- Running Google authentication; follow prompts "
    ./safire.py auth all
    echo "---------- Authenticated to Google "
 }
@@ -145,7 +164,7 @@ function check_auth {
 
 function second_half {
    check_auth
-   eval $(cat "$target_dir/$saf_dir/prefix_file")
+   eval $(cat "$prefix_file")
    echo "---------- Prefix set to $prefix"
 
    if [ -z "$google_group" ]
@@ -235,6 +254,32 @@ TV|/Media/TV' > $user_drive_list
   ./safire.py add projects $project_count
    echo "---------- Creating Service Accounts "
   ./safire.py add sas $prefix
+
+   echo "---------- Checking element counts "
+   ./safire.py list count > ~/safire/counts.tmp
+   # Drive count  : 12
+   # Project count: 50
+   # Group count  : 1
+   # JSON count   : 4900  << compare this
+   # SA count     : 4900
+   # Member count : 4900
+   
+   dc=$(sed -n 's/^Drive count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+   pc=$(sed -n 's/^Project count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+   gc=$(sed -n 's/^Group count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+   jc=$(sed -n 's/^JSON count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+   sc=$(sed -n 's/^SA count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+   mc=$(sed -n 's/^Member count *: \(.*\)/\1/p' < ~/safire/counts.tmp)
+
+   echo "Drive count  : $dc"
+   echo "Project count: $pc"
+   echo "Group count  : $gc"
+   echo "JSON count   : $jc"
+   echo "SA count     : $sc"
+   echo "Member count : $mc"
+
+   rm -f ~/safire/counts.tmp
+
    echo "---------- Adding Service Accounts to $google_group "
   ./safire.py add members $prefix $google_group
    echo "---------- Adding Alternative Service Accounts to $google_group "
@@ -249,13 +294,18 @@ TV|/Media/TV' > $user_drive_list
    for alt_group in $alternative_groups; do 
    	  ./safire.py add user $alt_group $prefix
    done
-  
    echo "---------- Downloading Service Account JSON files "
-	if [ ! "$download_json" ]; then
-		./safire.py add jsons
+
+   if [ "$jc" == "$sc" ]; then
+		echo "-------------- All SA JSON files aready downloaded "
 	else
-		echo "-------------- Skipping as requested "
+      if [ "$download_json" == 1 ]; then
+         ./safire.py add jsons
+      else
+         echo "-------------- Skipping as requested "
+      fi
 	fi
+
    echo "---------- Syncing Service Account JSON files to $target_dir/sa/all "
    # Explicitly targeting user home here
    rsync -av ~/safire/svcaccts/ $target_dir/sa/all
@@ -276,7 +326,8 @@ TV|/Media/TV' > $user_drive_list
    done < $user_drive_list
    
    echo "---------- Creating rclone union remote "
-   rclone config create google union upstreams="$sd_names"
+   rclone config create $union_remote union upstreams="$sd_names"
+   rclone lsd $union_remote:
    
    echo "---------- all done, deactivating virtual env "
    deactivate
