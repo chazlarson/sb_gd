@@ -1,7 +1,7 @@
 # sb_gd
 Script to set up Google Drive stuff for saltbox/cloudbox
 
-# Assumptions:
+## Assumptions:
  1. You have created a google project as described here: https://docs.saltbox.dev/reference/google-project-setup/
  2. You have the credential JSON to hand
  3. You have created a google group as described here: https://docs.saltbox.dev/reference/google-group-setup/
@@ -47,6 +47,8 @@ Second run will authenticate `safire`, then:
 
   1. Create rclone union remote combining the shared drives
   
+## Notes
+
 The script generates and uses a random six-character prefix to use with all the stuff it creates, so for example the default shared drives will be something like:
 ```
 MWxlw9_Movies
@@ -54,6 +56,8 @@ MWxlw9_Music
 MWxlw9_TV
 ```
 This means everything is away from stuff you created and can be cleaned up easily if need be.
+
+That prefix is saved in `~/safire/prefix_file`
 
 If you want to define the shared drives and paths for yourself, create a file `~/safire/list_drives` where each line is `DRIVENAME|PATH`.  The default used in the absence of that file is:
 ```
