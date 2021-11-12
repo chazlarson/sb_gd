@@ -54,3 +54,10 @@ MWxlw9_Music
 MWxlw9_TV
 ```
 This means everything is away from stuff you created and can be cleaned up easily if need be.
+
+If you want to define the shared drives and paths for yourself, create a file `~/safire/list_drives` where each line is `DRIVENAME|PATH`.  The default used in the absence of that file is:
+```
+Movies|/Media/Movies
+Music|/Media/Music
+TV|/Media/TV
+```
