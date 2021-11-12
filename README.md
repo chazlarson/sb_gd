@@ -7,15 +7,15 @@ Script to set up Google Drive stuff for saltbox/cloudbox
  3. You have created a google group as described here: https://docs.saltbox.dev/reference/google-group-setup/
  4. You have that group address to hand
  5. You have rclone installed
- 6. You are running python 3.8 and have run sudo apt install python3.8-venv -y
-    Probably other python3 works, the assumption is that I can create a venv
- 7. /opt is owned by you and writeable without sudo
+ 6. You are running python 3.8 and have run `sudo apt install python3.8-venv -y`.
+    Probably other python3 works [this was built on a new saltbox install, so the version is whatever that left me with].  The assumption is that I can create a Python virtual env
+ 7. `/opt` is owned by you and writeable without sudo
 
 This script is a two-stage thing.
 
-First run will clone and set up `safire`
+First run will clone and set up `safire`.
 
-Second run with authenticate safire, then:
+Second run will authenticate `safire`, then:
 
   1. Create shared drives if needed
      Default is three, "Movies", "Music", "TV"
@@ -46,3 +46,11 @@ Second run with authenticate safire, then:
      ```
 
   1. Create rclone union remote combining the shared drives
+  
+The script generates and uses a random six-character prefix to use with all the stuff it creates, so for example the default shared drives will be something like:
+```
+MWxlw9_Movies
+MWxlw9_Music
+MWxlw9_TV
+```
+This means everything is away from stuff you created and can be cleaned up easily if need be.
