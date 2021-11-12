@@ -18,12 +18,15 @@ First run will clone and set up `safire`.
 Second run will authenticate `safire`, then:
 
   1. Create shared drives if needed
+  
      Default is three, "Movies", "Music", "TV"
 
   1. Create projects
+  
      Default is three.
      
   1. Create service accounts
+
      Default is 100 per project
      
   1. Add service accounts to the google group you specify
@@ -35,6 +38,8 @@ Second run will authenticate `safire`, then:
   1. Sync service account JSON files to /opt/sa/all
 
   1. Create rclone remotes for the shared drives
+  
+     These are authenticated with a service account file, all using `/opt/sa/all/000150.json`
 
   1. Create standard file systems on the shared drives
 
