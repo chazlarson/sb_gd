@@ -32,7 +32,7 @@ download_json=1
 # Seriously, leave them alone
 saf_dir=safire
 target_dir=/opt
-union_remote=test-union
+union_remote=google
 rclone_bin=/usr/bin/rclone
 # Explicitly targeting user home here
 config_file=~/safire/config.py
