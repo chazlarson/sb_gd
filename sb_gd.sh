@@ -300,7 +300,7 @@ TV|/Media/TV' > $user_drive_list
 		echo "-------------- All SA JSON files aready downloaded "
 	else
       if [ "$download_json" == 1 ]; then
-         ./safire.py add jsons
+         ./safire.py add jsons $prefix
       else
          echo "-------------- Skipping as requested "
       fi
