@@ -1,6 +1,6 @@
 prefix = 'aZaSLasifn'
 
-group_email = "all-sa@chaztv.com"
+group_email = "all-sa@DOMAIN.com"
 
 drive_data = {
     'Movies':'/Media/Movies',
