@@ -18,15 +18,9 @@ from pathlib import Path
 # On first run you will be authenticated
 # ##############################################################
 
-prefix = 'akIhSwlKdf'
-
-group_email = "all-sa@chaztv.com"
-
-drive_data = {
-    'Movies':'/Media/Movies',
-    'Music':'/Media/Music',
-    'TV':'/Media/TV'
-}
+from config import prefix
+from config import group_email
+from config import drive_data
 
 #     organizer = Manager
 #     fileOrganizer = Content manager
