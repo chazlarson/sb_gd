@@ -6,6 +6,7 @@ from apiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
 from pathlib import Path
+import os
 
 # ##############################################################
 # You need to install the Google API stuff
@@ -21,6 +22,7 @@ from pathlib import Path
 from config import prefix
 from config import group_email
 from config import drive_data
+from config import sa_file
 
 #     organizer = Manager
 #     fileOrganizer = Content manager
@@ -96,6 +98,13 @@ def create_bin_file_on_root(folder_id, fn, name):
             supportsTeamDrives=True, fields='id').execute().get('id')
 
 
+def create_rclone_remote(drive_id, name):
+    rc_cmd = f"rclone config create {name} drive scope=drive service_account_file={sa_file} team_drive={drive_id}"
+    drive_res = os.system(rc_cmd)
+    print(drive_res)
+
+remote_list=""
+
 for dn, mediapath in drive_data.items():
     page_token = None
     drivename = f"{prefix}-{dn}"
@@ -124,7 +133,15 @@ for dn, mediapath in drive_data.items():
         print(f"** bin file created on root, ID {file_id}")
         
         create_media_dirs(td_id, mediapath)
+
+        create_rclone_remote(td_id, drivename)
+
+        remote_list += f"{drivename}:/ "
     else:
         for drive in response.get('drives', []):
             print(f"Found shared drive: {drive.get('name')} ({drive.get('id')})")
 
+if len(remote_list) > 0:
+    rc_cmd = f"rclone config create google union upstreams=\"{remote_list}\""
+    os.system(rc_cmd)
+    
