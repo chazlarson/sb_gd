@@ -4,6 +4,7 @@ import uuid
 from apiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
+from pathlib import Path
 
 # ##############################################################
 # You need to install the Google API stuff
@@ -22,8 +23,8 @@ from oauth2client import file, client, tools
 # THE SCRIPT WILL HAPPILY CREATE DUPLICATES EVERY TIME YOU RUN IT
 # ##############################################################
 drivenames = [
-    'Movies',
-    'TV'
+    'TEST-Movies',
+    'TEST-TV'
 ]
 
 # ##############################################################
@@ -49,8 +50,7 @@ mediadirs = [
 # Really Actually Pretty Sorry about that.
 # ##############################################################
 user_emails_with_roles = {
-    'group@domain.com': 'organizer',
-    'thatguyfromthebar@whatever.com': 'reader'
+    'all-sa@chaztv.com': 'organizer'
 }
 
 FOLDER_MIME = 'application/vnd.google-apps.folder'
@@ -64,6 +64,8 @@ if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets('client_secrets.json', SCOPES)
     creds = tools.run_flow(flow, store)
 DRIVE = discovery.build('drive', 'v3', http=creds.authorize(Http()))
+
+Path(SOURCE_FILE).touch()
 
 def create_td(td_name):
     request_id = str(uuid.uuid4()) # random unique UUID string
