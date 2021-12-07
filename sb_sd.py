@@ -140,6 +140,7 @@ for dn, mediapath in drive_data.items():
     else:
         for drive in response.get('drives', []):
             print(f"Found shared drive: {drive.get('name')} ({drive.get('id')})")
+            remote_list += f"{drivename}:/ "
 
 if len(remote_list) > 0:
     rc_cmd = f"rclone config create google union upstreams=\"{remote_list}\""
