@@ -100,6 +100,7 @@ def create_bin_file_on_root(folder_id, fn, name):
 
 def create_rclone_remote(drive_id, name):
     rc_cmd = f"rclone config create {name} drive scope=drive service_account_file={sa_file} team_drive={drive_id}"
+    print(rc_cmd)
     drive_res = os.system(rc_cmd)
     print(drive_res)
 
@@ -143,6 +144,7 @@ for dn, mediapath in drive_data.items():
             remote_list += f"{drivename}:/ "
 
 if len(remote_list) > 0:
-    rc_cmd = f"rclone config create google union upstreams=\"{remote_list}\""
+    rc_cmd = f"rclone config create google union upstreams \"{remote_list}\""
+    print(rc_cmd)
     os.system(rc_cmd)
     
