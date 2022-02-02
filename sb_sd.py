@@ -8,15 +8,15 @@ from oauth2client import file, client, tools
 from pathlib import Path
 import os
 
-if input("Have you verified drive permissions on your google account? [y/n]") == ("y") and
-   input("Have you created the required base project? [y/n]") == ("y") and
-   input("Have you created the required Google Group? [y/n]") == ("y") and
-   input("Have you installed the gcloud SDK tools? [y/n]") == ("y") and
-   input("Have you created the expected projects and service accounts? [y/n]") == ("y")
-       print ("well done, we will continue")
-else
-	print ("See details here and come back when steps 1-5 are completed")
-	print ("https://docs.saltbox.dev/reference/rclone-manual/")
+if (input("Have you verified drive permissions on your google account? [y/n] ") == ("y") and
+    input("Have you created the required base project? [y/n] ") == ("y") and
+    input("Have you created the required Google Group? [y/n] ") == ("y") and
+    input("Have you installed the gcloud SDK tools? [y/n] ") == ("y") and
+    input("Have you created the expected projects and service accounts? [y/n] ") == ("y")):
+        print ("well done, continuing...\n\n")
+else:
+    print ("\n\nSee details here and come back when steps 1-5 are completed")
+    print ("https://docs.saltbox.dev/reference/rclone-manual/")
     exit()
 
 # ##############################################################
@@ -35,18 +35,18 @@ from config import group_email
 from config import drive_data
 from config import sa_file
 
-if prefix == 'aZaSjsklaj'
-	print ("It doesn't look like you've edited the default config.")
-	print ("See step 4 on this page:")
-	print ("https://docs.saltbox.dev/reference/google-shared-drives/")   
+if (prefix == 'aZaSjsklaj'):
+    print ("\n\nIt doesn't look like you've edited the default config.")
+    print ("See step 4 on this page:")
+    print ("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
 path = Path('client_secrets.json')
 
-if not path.is_file()
-	print ("There is no client_secrets.json here.")
-	print ("See step 5 on this page:")
-	print ("https://docs.saltbox.dev/reference/google-shared-drives/")   
+if not path.is_file():
+    print ("\n\nThere is no client_secrets.json here.")
+    print ("See step 5 on this page:")
+    print ("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
 #     organizer = Manager
@@ -157,7 +157,7 @@ for dn, mediapath in drive_data.items():
         mountfile = drivename.lower().replace(' ', '_') + "_mounted.bin"
         file_id = create_bin_file_on_root(td_id, SOURCE_FILE, mountfile)
         print(f"** bin file created on root, ID {file_id}")
-        
+
         create_media_dirs(td_id, mediapath)
 
         create_rclone_remote(td_id, drivename)
@@ -172,4 +172,4 @@ if len(remote_list) > 0:
     rc_cmd = f"rclone config create google union upstreams \"{remote_list}\""
     print(rc_cmd)
     os.system(rc_cmd)
-    
+
