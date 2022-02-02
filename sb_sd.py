@@ -8,6 +8,17 @@ from oauth2client import file, client, tools
 from pathlib import Path
 import os
 
+if input("Have you verified drive permissions on your google account? [y/n]") == ("y") and
+   input("Have you created the required base project? [y/n]") == ("y") and
+   input("Have you created the required Google Group? [y/n]") == ("y") and
+   input("Have you installed the gcloud SDK tools? [y/n]") == ("y") and
+   input("Have you created the expected projects and service accounts? [y/n]") == ("y")
+       print ("well done, we will continue")
+else
+	print ("See details here and come back when steps 1-5 are completed")
+	print ("https://docs.saltbox.dev/reference/rclone-manual/")
+    exit()
+
 # ##############################################################
 # You need to install the Google API stuff
 # There's a link on the page where I cribbed this:
@@ -23,6 +34,20 @@ from config import prefix
 from config import group_email
 from config import drive_data
 from config import sa_file
+
+if prefix == 'aZaSjsklaj'
+	print ("It doesn't look like you've edited the default config.")
+	print ("See step 4 on this page:")
+	print ("https://docs.saltbox.dev/reference/google-shared-drives/")   
+    exit()
+
+path = Path('client_secrets.json')
+
+if not path.is_file()
+	print ("There is no client_secrets.json here.")
+	print ("See step 5 on this page:")
+	print ("https://docs.saltbox.dev/reference/google-shared-drives/")   
+    exit()
 
 #     organizer = Manager
 #     fileOrganizer = Content manager
