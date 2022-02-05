@@ -2,17 +2,17 @@
 Script to set up Google Drive stuff for saltbox/cloudbox
 
 ## Assumptions:
- 1. You have verified Gogoel accoutn permissions as described here: https://docs.saltbox.dev/reference/google-account-perms/
- 1. You have created a google project as described here: https://docs.saltbox.dev/reference/google-project-setup/
+ 1. You have verified Google account permissions as described here: https://docs.saltbox.dev/reference/google-account-perms/
+ 1. You have created a Google project as described here: https://docs.saltbox.dev/reference/google-project-setup/
  1. You have the credential JSON to hand
- 1. You have created a google group as described here: https://docs.saltbox.dev/reference/google-group-setup/
+ 1. You have created a Google group as described here: https://docs.saltbox.dev/reference/google-group-setup/
  1. You have that group address to hand
  1. You have rclone installed
  1. You are running python 3.8 and have run `sudo apt install python3.8-venv -y`.
     Probably other python3 works [this was built on a new saltbox install, so the version is whatever that left me with].  The assumption is that I can create a Python virtual env
  1. `/opt` is owned by you and writeable without sudo
 
-NOTE: the sh verison of this script is described below and is not currenlty used by saltbox because while it always worked on my machine, it never worked on some others' machines.
+NOTE: the sh verison of this script is described below and is not currently used by saltbox because while it always worked on my machine, it never worked on some others' machines.
 
 The python version usage is described in the saltbox docs: https://docs.saltbox.dev/reference/google-shared-drives/
 
