@@ -12,11 +12,16 @@ Script to set up Google Drive stuff for saltbox/cloudbox
     Probably other python3 works [this was built on a new saltbox install, so the version is whatever that left me with].  The assumption is that I can create a Python virtual env
  1. `/opt` is owned by you and writeable without sudo
 
-NOTE: the sh verison of this script is described below and is not currently used by saltbox because while it always worked on my machine, it never worked on some others' machines.
-
+## Python versions
 The python version usage is described in the saltbox docs: https://docs.saltbox.dev/reference/google-shared-drives/
 
+`sb_sd.py` - Saltbox setup for Google Shared drives
+`sb_cp.py` - adjusts stock Cloudplow config files for these shared drives and service accounts.
+`sb_pas.py` - adjusts stock Plex Autoscan config file for these shared drives.
+
 ## sb_gd.sh
+
+NOTE: the sh version of this script is described below and is not currently used by saltbox because while it always worked on my machine, it never worked on some others' machines.
 
 This script is a two-stage thing.
 
