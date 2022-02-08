@@ -63,6 +63,7 @@ path_map[path_map_key] = path_map_list
 
 data['SERVER_PATH_MAPPINGS'] = path_map
 data['GOOGLE']['TEAMDRIVES'] = teamdrives
+data['GOOGLE']['TEAMDRIVE'] = True
 data['GOOGLE']['ALLOWED']['FILE_PATHS'] = filepaths
 data['PLEX_EMPTY_TRASH_CONTROL_FILES'] = control_files
 
