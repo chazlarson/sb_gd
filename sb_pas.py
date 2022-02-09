@@ -15,11 +15,11 @@ from config import group_email
 from config import drive_data
 from config import sa_file
 
-CLOUDPLOW_PATH = "plex_autoscan/config/"
+PAS_PATH = "/opt/plex_autoscan/config/"
 
 p = Path(sa_file)
 
-CONFIG_PATH = f"{CLOUDPLOW_PATH}config.json"
+CONFIG_PATH = f"{PAS_PATH}config.json"
 path = Path(CONFIG_PATH)
 
 if not path.is_file():
