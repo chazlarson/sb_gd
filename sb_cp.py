@@ -33,14 +33,18 @@ with open(CONFIG_PATH, 'r') as f:
 remotes = data['remotes']
 uploaders = data['uploader']
 
-if len(remotes) > 1:
-    print (f"\n\nToo many remotes.")
-    exit()
-
 first_key = list(remotes.keys())[0]
 first_remote = list(remotes.values())[0]
 
 first_uploader = list(uploaders.values())[0]
+
+if len(remotes) > 1:
+    if prefix in first_key:
+        print (f"\n\nLooks like this script has already been run.")
+        print (f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
+        exit()
+    print (f"\n\nToo many remotes.")
+    exit()
 
 if first_key != 'google':
     print (f"\n\nDoesn't seem like a stock cloudplow config.")
