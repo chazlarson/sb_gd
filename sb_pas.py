@@ -46,6 +46,12 @@ path_map = {}
 teamdrives = google['TEAMDRIVES']
 filepaths = google['ALLOWED']['FILE_PATHS']
 
+for td in teamdrives:
+    if prefix in td:
+        print (f"\n\nLooks like this script has already been run.")
+        print (f"\nThere's a teamdrive [{td}] defined, which contains the prefix [{prefix}].")
+        exit()
+
 for drive in drive_data:
     drive_name = f"{prefix}-{drive}"
     path = Path(drive_data[drive])
