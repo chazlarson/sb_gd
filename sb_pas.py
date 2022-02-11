@@ -26,6 +26,19 @@ if not path.is_file():
     print (f"\n\nThere is no {CONFIG_PATH} here.")
     exit()
 
+SECRET_PATH = f"client_secrets.json"
+path = Path(SECRET_PATH)
+
+if not path.is_file():
+    print (f"\n\nThere is no {SECRET_PATH} here.")
+    exit()
+
+with open(SECRET_PATH, 'r') as f:
+    secret_data = json.load(f)
+
+google_client_id = secret_data['installed']['client_id']
+google_client_secret = secret_data['installed']['client_secret']
+
 with open(CONFIG_PATH, 'r') as f:
     data = json.load(f)
 
@@ -73,6 +86,9 @@ data['GOOGLE']['TEAMDRIVE'] = True
 data['GOOGLE']['ENABLED'] = True
 data['GOOGLE']['ALLOWED']['FILE_PATHS'] = filepaths
 data['PLEX_EMPTY_TRASH_CONTROL_FILES'] = control_files
+
+data['GOOGLE']['CLIENT_ID'] = google_client_id
+data['GOOGLE']['CLIENT_SECRET'] = google_client_secret
 
 shutil.copyfile(CONFIG_PATH, f"{CONFIG_PATH}.old")
 
