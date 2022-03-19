@@ -16,7 +16,9 @@ Script to set up Google Drive stuff for saltbox/cloudbox
 The python version usage is described in the saltbox docs: https://docs.saltbox.dev/reference/google-shared-drives/
 
 `sb_sd.py` - Saltbox setup for Google Shared drives
+
 `sb_cp.py` - adjusts stock Cloudplow config files for these shared drives and service accounts.
+
 `sb_pas.py` - adjusts stock Plex Autoscan config file for these shared drives.
 
 ## sb_gd.sh
