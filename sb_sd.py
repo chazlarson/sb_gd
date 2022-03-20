@@ -75,7 +75,7 @@ SERVICE_ACCOUNT_FILE = 'service-account.json'
 store = file.Storage('storage.json')
 creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
-DRIVE = discovery.build('drive', 'v3', creds=creds)
+DRIVE = discovery.build('drive', 'v3', credentials=creds)
 
 Path(SOURCE_FILE).touch()
 
