@@ -17,7 +17,7 @@ CONFIG_PATH = f"{CLOUDPLOW_PATH}config.json"
 path = Path(CONFIG_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {CONFIG_PATH} here.")
+    print(f"\n\nThere is no {CONFIG_PATH} here.")
     exit()
 
 with open(CONFIG_PATH, 'r') as f:
@@ -35,7 +35,7 @@ first_uploader = list(uploaders.values())[0]
 if len(remotes) > 1:
     if prefix in first_key:
         print("\\n\\nLooks like this script has already been run.")
-        print (f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
+        print(f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
         exit()
     print("\\n\\nToo many remotes.")
     exit()

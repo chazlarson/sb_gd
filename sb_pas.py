@@ -16,14 +16,14 @@ CONFIG_PATH = f"{PAS_PATH}config.json"
 path = Path(CONFIG_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {CONFIG_PATH} here.")
+    print(f"\n\nThere is no {CONFIG_PATH} here.")
     exit()
 
 SECRET_PATH = "client_secrets.json"
 path = Path(SECRET_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {SECRET_PATH} here.")
+    print(f"\n\nThere is no {SECRET_PATH} here.")
     exit()
 
 with open(SECRET_PATH, 'r') as f:
@@ -55,7 +55,7 @@ filepaths = google['ALLOWED']['FILE_PATHS']
 for td in teamdrives:
     if prefix in td:
         print("\\n\\nLooks like this script has already been run.")
-        print (f"\nThere's a teamdrive [{td}] defined, which contains the prefix [{prefix}].")
+        print(f"\nThere's a teamdrive [{td}] defined, which contains the prefix [{prefix}].")
         exit()
 
 for drive in drive_data:
