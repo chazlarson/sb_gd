@@ -1,11 +1,12 @@
 from __future__ import print_function
 import uuid
+import os
 
 from apiclient import discovery
+from httplib2 import Http
 from oauth2client import file
-from oauth2client.service_account import ServiceAccountCredentials
 from pathlib import Path
-import os
+from oauth2client import client
 
 if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
         input("Have you created the required base project? [y/n] ") == "y" and
@@ -73,9 +74,18 @@ BIN_MIME = "application/octet-stream"
 SCOPES = 'https://www.googleapis.com/auth/drive'
 SERVICE_ACCOUNT_FILE = 'service-account.json'
 store = file.Storage('storage.json')
-creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-DRIVE = discovery.build('drive', 'v3', credentials=creds)
+creds = store.get()
+if not creds or creds.invalid:
+    flow = client.flow_from_clientsecrets(
+        'client_secrets.json',
+        scope=SCOPES,
+        redirect_uri='http://localhost:8000/oauth2callback')
+    auth_uri = flow.step1_get_authorize_url()
+    print('Please go to this URL: {}'.format(auth_uri))
+    auth_code = input('Enter the authorization code: ')
+    creds = flow.step2_exchange(auth_code)
+    store.put(creds)
+DRIVE = discovery.build('drive', 'v3', http=creds.authorize(Http()))
 
 Path(SOURCE_FILE).touch()
 
@@ -133,7 +143,6 @@ for dn, mediapath in drive_data.items():
     response = DRIVE.drives().list(
         q=f"name contains '{drivename}'",
         fields='nextPageToken, drives(id, name)',
-        useDomainAdminAccess=True,
         pageToken=page_token).execute()
     # if this drive doesn't exist
     # then we can continue
