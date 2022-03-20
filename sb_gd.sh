@@ -84,13 +84,13 @@ function first_half {
    # sudo apt install python3.8-venv -y
    echo "---------- Setting up safire"
    
-   cd $target_dir
+   cd $target_dir || exit 1
    
    if [ ! -d $saf_dir ]; then
       git clone https://github.com/chazlarson/safire $saf_dir
    fi
    
-   cd $saf_dir/safire
+   cd $saf_dir/safire || exit 1
    
    if [ ! -d safire-venv ]; then
       python3 -m venv safire-venv
@@ -107,12 +107,12 @@ function first_half {
 
    if [ -f $prefix_file ]; then
       echo "---------- FOUND $prefix_file"
-      eval $(cat "$prefix_file")
+      eval "$(cat "$prefix_file")"
    else
       echo "---------- File $prefix_file does not exist."
       prefix=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c6 ;)
       echo "export prefix=$prefix" > "$prefix_file"
-      eval $(cat "$prefix_file")
+      eval "$(cat "$prefix_file")"
    fi
    
    echo "---------- Prefix set to $prefix"
@@ -132,7 +132,7 @@ function first_half {
 
 function find_and_activate_safire() {
    echo "---------- Changing dir and activating virtualenv "
-   cd $target_dir/$saf_dir/safire
+   cd $target_dir/$saf_dir/safire || exit 1
    source safire-venv/bin/activate
 }
 
@@ -164,7 +164,7 @@ function check_auth {
 
 function second_half {
    check_auth
-   eval $(cat "$prefix_file")
+   eval "$(cat "$prefix_file")"
    echo "---------- Prefix set to $prefix"
 
    if [ -z "$google_group" ]
@@ -195,7 +195,7 @@ TV|/Media/TV' > $user_drive_list
    fi
 
    # get list of existing shared drives
-   ./safire.py list drives $prefix
+   ./safire.py list drives "$prefix"
    # Explicitly targeting user home here
    drive_list_file=~/safire/data/drives_list_${prefix}_.csv
 
@@ -216,10 +216,10 @@ TV|/Media/TV' > $user_drive_list
 			  if [ "$name" = "$line" ]; then
 				  foundOne=1
 			  fi
- 	      done < $drive_list_file
+ 	      done < "$drive_list_file"
 		  if [ ! "$foundOne" ]; then
 			  echo "---------- Need to create $line"
-			  echo $line >> $drives_to_create
+			  echo "$line" >> $drives_to_create
 		  fi
  	      IFS=$OLDIFS
 	  done < $shared_drive_names
@@ -253,7 +253,7 @@ TV|/Media/TV' > $user_drive_list
    echo "---------- Creating Projects "
   ./safire.py add projects $project_count
    echo "---------- Creating Service Accounts "
-  ./safire.py add sas $prefix
+  ./safire.py add sas "$prefix"
 
    echo "---------- Checking element counts "
    ./safire.py list count > ~/safire/counts.tmp
@@ -281,18 +281,18 @@ TV|/Media/TV' > $user_drive_list
    rm -f ~/safire/counts.tmp
 
    echo "---------- Adding Service Accounts to $google_group "
-  ./safire.py add members $prefix $google_group
+  ./safire.py add members "$prefix" "$google_group"
    echo "---------- Adding Alternative Service Accounts to $google_group "
    for alt_prefix in $alternative_prefixes; do 
-   	  ./safire.py add members $alt_prefix $google_group
+   	  ./safire.py add members "$alt_prefix" "$google_group"
    done
 
    echo "---------- Adding $google_group to Shared Drives "
-  ./safire.py add user $google_group $prefix
+  ./safire.py add user "$google_group" "$prefix"
 
    echo "---------- Adding alternative groups to Shared Drives "
    for alt_group in $alternative_groups; do 
-   	  ./safire.py add user $alt_group $prefix
+   	  ./safire.py add user "$alt_group" "$prefix"
    done
    echo "---------- Downloading Service Account JSON files "
 
@@ -300,7 +300,7 @@ TV|/Media/TV' > $user_drive_list
 		echo "-------------- All SA JSON files aready downloaded "
 	else
       if [ "$download_json" == 1 ]; then
-         ./safire.py add jsons $prefix
+         ./safire.py add jsons "$prefix"
       else
          echo "-------------- Skipping as requested "
       fi
@@ -314,15 +314,15 @@ TV|/Media/TV' > $user_drive_list
  sd_names=""
 
   while IFS="|" read -r sd_name sd_id; do
-      rclone config create $sd_name drive scope=drive service_account_file=$target_dir/sa/all/000150.json team_drive=$sd_id
-      rclone touch $sd_name:/saltbox-created-$sd_name
-      rclone touch $sd_name:/$sd_name-mount.bin
+      rclone config create "$sd_name" drive scope=drive service_account_file=$target_dir/sa/all/000150.json team_drive="$sd_id"
+      rclone touch "$sd_name":/saltbox-created-"$sd_name"
+      rclone touch "$sd_name":/"$sd_name"-mount.bin
 	  sd_names+="$sd_name: " 
    done < $drive_ids
 
    echo "---------- Creating standard file systems "
    while IFS="|" read -r drive dir; do
-	  rclone mkdir ${prefix}_${drive}:$dir
+	  rclone mkdir "${prefix}"_"${drive}":"$dir"
    done < $user_drive_list
    
    echo "---------- Creating rclone union remote "
