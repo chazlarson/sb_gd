@@ -1,22 +1,22 @@
 from __future__ import print_function
 import uuid
-import argparse
+import os
 
 from apiclient import discovery
 from httplib2 import Http
-from oauth2client import file, client, tools
+from oauth2client import file
 from pathlib import Path
-import os
+from oauth2client import client
 
-if (input("Have you verified drive permissions on your google account? [y/n] ") == ("y") and
-    input("Have you created the required base project? [y/n] ") == ("y") and
-    input("Have you created the required Google Group? [y/n] ") == ("y") and
-    input("Have you installed the gcloud SDK tools? [y/n] ") == ("y") and
-    input("Have you created the expected projects and service accounts? [y/n] ") == ("y")):
-        print ("well done, continuing...\n\n")
+if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
+        input("Have you created the required base project? [y/n] ") == "y" and
+        input("Have you created the required Google Group? [y/n] ") == "y" and
+        input("Have you installed the gcloud SDK tools? [y/n] ") == "y" and
+        input("Have you created the expected projects and service accounts? [y/n] ") == "y"):
+    print("well done, continuing...\n\n")
 else:
-    print ("\n\nSee details here and come back when steps 1-5 are completed")
-    print ("https://docs.saltbox.dev/reference/rclone-manual/")
+    print("\n\nSee details here and come back when steps 1-5 are completed")
+    print("https://docs.saltbox.dev/reference/rclone-manual/")
     exit()
 
 # ##############################################################
@@ -35,18 +35,18 @@ from config import group_email
 from config import drive_data
 from config import sa_file
 
-if (prefix == 'aZaSjsklaj'):
-    print ("\n\nIt doesn't look like you've edited the default config.")
-    print ("See step 4 on this page:")
-    print ("https://docs.saltbox.dev/reference/google-shared-drives/")
+if prefix == 'aZaSjsklaj':
+    print("\n\nIt doesn't look like you've edited the default config.")
+    print("See step 4 on this page:")
+    print("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
 path = Path('client_secrets.json')
 
 if not path.is_file():
-    print ("\n\nThere is no client_secrets.json here.")
-    print ("See step 5 on this page:")
-    print ("https://docs.saltbox.dev/reference/google-shared-drives/")
+    print("\n\nThere is no client_secrets.json here.")
+    print("See step 5 on this page:")
+    print("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
 #     organizer = Manager
@@ -72,55 +72,60 @@ DRIVE_LOG = 'drive_create_log'
 BIN_MIME = "application/octet-stream"
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
+SERVICE_ACCOUNT_FILE = 'service-account.json'
 store = file.Storage('storage.json')
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('client_secrets.json', SCOPES)
-    parser = argparse.ArgumentParser(
-    description=__doc__,
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    parents=[tools.argparser])
-    flags = parser.parse_args(['--noauth_local_webserver'])
-
-    creds = tools.run_flow(flow, store, flags)
+    flow = client.flow_from_clientsecrets(
+        'client_secrets.json',
+        scope=SCOPES,
+        redirect_uri='http://localhost:8000/oauth2callback')
+    auth_uri = flow.step1_get_authorize_url()
+    print('Please go to this URL: {}'.format(auth_uri))
+    auth_code = input('Enter the authorization code: ')
+    creds = flow.step2_exchange(auth_code)
+    store.put(creds)
 DRIVE = discovery.build('drive', 'v3', http=creds.authorize(Http()))
 
 Path(SOURCE_FILE).touch()
 
+
 def create_td(td_name):
-    request_id = str(uuid.uuid4()) # random unique UUID string
+    request_id = str(uuid.uuid4())  # random unique UUID string
     body = {'name': td_name}
     return DRIVE.teamdrives().create(body=body,
-            requestId=request_id, fields='id').execute().get('id')
+                                     requestId=request_id, fields='id').execute().get('id')
+
 
 def add_user(td_id, user, role='organizer'):
     body = {'type': 'user', 'role': role, 'emailAddress': user}
     return DRIVE.permissions().create(body=body, fileId=td_id,
-            supportsTeamDrives=True, fields='id').execute().get('id')
+                                      supportsTeamDrives=True, fields='id').execute().get('id')
+
 
 def create_folder(root_id, folder):
     body = {'name': folder, 'mimeType': FOLDER_MIME, 'parents': [root_id]}
     return DRIVE.files().create(body=body,
-            supportsTeamDrives=True, fields='id').execute().get('id')
+                                supportsTeamDrives=True, fields='id').execute().get('id')
+
 
 def create_media_dirs(root_id, mediapath):
     fld_id = root_id
-    pathList = mediapath.split('/')
-    for folder in pathList:
+    path_list = mediapath.split('/')
+    for folder in path_list:
         if len(folder) != 0:
             q = "'" + fld_id + "' in parents and name='" + folder + "' and mimeType='application/vnd.google-apps.folder' and trashed=false"
-            files = DRIVE.files().list(q=q).execute().get('files')
-            if not files:
+            if files := DRIVE.files().list(q=q).execute().get('files'):
+                fld_id = files[0].get('id')
+            else:
                 fld_id = create_folder(fld_id, folder)
                 print(f"** Folder {folder} created, ID {fld_id}")
-            else:
-                fld_id = files[0].get('id')
 
 
 def create_bin_file_on_root(folder_id, fn, name):
     body = {'name': name, 'mimeType': BIN_MIME, 'parents': [folder_id]}
     return DRIVE.files().create(body=body, media_body=fn,
-            supportsTeamDrives=True, fields='id').execute().get('id')
+                                supportsTeamDrives=True, fields='id').execute().get('id')
 
 
 def create_rclone_remote(drive_id, name):
@@ -129,16 +134,16 @@ def create_rclone_remote(drive_id, name):
     drive_res = os.system(rc_cmd)
     print(drive_res)
 
-remote_list=""
+
+remote_list = ""
 
 for dn, mediapath in drive_data.items():
     page_token = None
     drivename = f"{prefix}-{dn}"
     response = DRIVE.drives().list(
-            q=f"name contains '{drivename}'",
-            fields='nextPageToken, drives(id, name)',
-            useDomainAdminAccess = True,
-            pageToken=page_token).execute()
+        q=f"name contains '{drivename}'",
+        fields='nextPageToken, drives(id, name)',
+        pageToken=page_token).execute()
     # if this drive doesn't exist
     # then we can continue
     if len(response.get('drives')) == 0:
@@ -172,4 +177,3 @@ if len(remote_list) > 0:
     rc_cmd = f"rclone config create google union upstreams \"{remote_list}\""
     print(rc_cmd)
     os.system(rc_cmd)
-

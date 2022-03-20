@@ -1,17 +1,11 @@
 from __future__ import print_function
-import uuid
-import argparse
 
-from apiclient import discovery
-from httplib2 import Http
-from oauth2client import file, client, tools
 from pathlib import Path
-import os
+
 import json
 import shutil
 
 from config import prefix
-from config import group_email
 from config import drive_data
 from config import sa_file
 
@@ -23,7 +17,7 @@ CONFIG_PATH = f"{CLOUDPLOW_PATH}config.json"
 path = Path(CONFIG_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {CONFIG_PATH} here.")
+    print(f"\n\nThere is no {CONFIG_PATH} here.")
     exit()
 
 with open(CONFIG_PATH, 'r') as f:
@@ -40,21 +34,21 @@ first_uploader = list(uploaders.values())[0]
 
 if len(remotes) > 1:
     if prefix in first_key:
-        print (f"\n\nLooks like this script has already been run.")
-        print (f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
+        print("\\n\\nLooks like this script has already been run.")
+        print(f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
         exit()
-    print (f"\n\nToo many remotes.")
+    print("\\n\\nToo many remotes.")
     exit()
 
 if first_key != 'google':
-    print (f"\n\nDoesn't seem like a stock cloudplow config.")
+    print("\\n\\nDoesn't seem like a stock cloudplow config.")
     exit()
 
 data['remotes'] = {}
 data['uploader'] = {}
 
+page_token = None
 for dn, mediapath in drive_data.items():
-    page_token = None
     drivename = f"{prefix}-{dn}"
 
     newRemote = first_remote.copy()

@@ -1,17 +1,10 @@
 from __future__ import print_function
-import uuid
-import argparse
 
-from apiclient import discovery
-from httplib2 import Http
-from oauth2client import file, client, tools
 from pathlib import Path
-import os
 import json
 import shutil
 
 from config import prefix
-from config import group_email
 from config import drive_data
 from config import sa_file
 
@@ -23,14 +16,14 @@ CONFIG_PATH = f"{PAS_PATH}config.json"
 path = Path(CONFIG_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {CONFIG_PATH} here.")
+    print(f"\n\nThere is no {CONFIG_PATH} here.")
     exit()
 
-SECRET_PATH = f"client_secrets.json"
+SECRET_PATH = "client_secrets.json"
 path = Path(SECRET_PATH)
 
 if not path.is_file():
-    print (f"\n\nThere is no {SECRET_PATH} here.")
+    print(f"\n\nThere is no {SECRET_PATH} here.")
     exit()
 
 with open(SECRET_PATH, 'r') as f:
@@ -47,7 +40,7 @@ control_files = []
 path_mappings = data['SERVER_PATH_MAPPINGS']
 
 if len(path_mappings) > 1:
-    print (f"\n\nThis doesn't seem like a stock PAS config.")
+    print("\\n\\nThis doesn't seem like a stock PAS config.")
     exit()
 
 path_map = list(path_mappings.items())[0]
@@ -61,8 +54,8 @@ filepaths = google['ALLOWED']['FILE_PATHS']
 
 for td in teamdrives:
     if prefix in td:
-        print (f"\n\nLooks like this script has already been run.")
-        print (f"\nThere's a teamdrive [{td}] defined, which contains the prefix [{prefix}].")
+        print("\\n\\nLooks like this script has already been run.")
+        print(f"\nThere's a teamdrive [{td}] defined, which contains the prefix [{prefix}].")
         exit()
 
 for drive in drive_data:
