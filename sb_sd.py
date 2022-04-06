@@ -1,9 +1,6 @@
-import time
+from __future__ import print_function
 import uuid
 import os
-import socket
-import sys
-import threading
 
 from apiclient import discovery
 from httplib2 import Http
@@ -11,21 +8,27 @@ from oauth2client import file
 from pathlib import Path
 from oauth2client import client
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from socketserver import ThreadingMixIn
-from http.server import HTTPServer
-
-
-if (input("Have you verified drive permissions on your google account? [y/n] ") == ("y") and
-    input("Have you created the required base project? [y/n] ") == ("y") and
-    input("Have you created the required Google Group? [y/n] ") == ("y") and
-    input("Have you installed the gcloud SDK tools? [y/n] ") == ("y") and
-    input("Have you created the expected projects and service accounts? [y/n] ") == ("y")):
-        print ("well done, continuing...\n\n")
+if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
+        input("Have you created the required base project? [y/n] ") == "y" and
+        input("Have you created the required Google Group? [y/n] ") == "y" and
+        input("Have you installed the gcloud SDK tools? [y/n] ") == "y" and
+        input("Have you created the expected projects and service accounts? [y/n] ") == "y"):
+    print("well done, continuing...\n\n")
 else:
     print("\n\nSee details here and come back when steps 1-5 are completed")
     print("https://docs.saltbox.dev/reference/rclone-manual/")
     exit()
+
+# ##############################################################
+# You need to install the Google API stuff
+# There's a link on the page where I cribbed this:
+# https://wescpy.blogspot.com/2017/06/managing-team-drives-with-python-and.html
+# ##############################################################
+
+# ##############################################################
+# You'll need the usual "client_secrets.json" file next to this
+# On first run you will be authenticated
+# ##############################################################
 
 from config import prefix
 from config import group_email
@@ -45,78 +48,6 @@ if not path.is_file():
     print("See step 5 on this page:")
     print("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
-
-# Python3 code to display hostname and
-# IP address
-
-host_name = socket.gethostname()
-host_ip = socket.gethostbyname(host_name)
-
-class Spinner:
-    busy = False
-    delay = 0.1
-
-    @staticmethod
-    def spinning_cursor():
-        while 1:
-            for cursor in '|/-\\': yield cursor
-
-    def __init__(self, delay=None):
-        self.spinner_generator = self.spinning_cursor()
-        if delay and float(delay): self.delay = delay
-
-    def spinner_task(self):
-        while self.busy:
-            sys.stdout.write(next(self.spinner_generator))
-            sys.stdout.flush()
-            time.sleep(self.delay)
-            sys.stdout.write('\b')
-            sys.stdout.flush()
-
-    def __enter__(self):
-        self.busy = True
-        threading.Thread(target=self.spinner_task).start()
-
-    def __exit__(self, exception, value, tb):
-        self.busy = False
-        time.sleep(self.delay)
-        if exception is not None:
-            return False
-
-from urllib.parse import parse_qs
-
-class Handler(BaseHTTPRequestHandler):
-
-    def do_GET(self):
-        # self.path = '/oauth2callback?code=4%2F0AX4XfWhMAtdElAuVTIaMhMsNgYVmuXLdTwm-DEsVdfZ6hdjbmAtGj5k5OKFpdiZrhuHiVQ&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive'
-        s = self.path
-        values = parse_qs(s[2:]) # prints {'other': ['some'], 'parameter': ['value']}
-        if 'code' in values:
-            auth_code = values['code'][0]
-            creds = flow.step2_exchange(auth_code)
-            store.put(creds)
-            self.send_response(200)
-            self.end_headers()
-
-
-class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
-    pass
-
-# server = ThreadingSimpleServer(('0.0.0.0', 8000), Handler)
-# server.serve_forever()
-
-def start_server(path, port=8000):
-    '''Start a simple webserver serving path on port'''
-    httpd = HTTPServer((host_ip, port), Handler)
-    httpd.serve_forever()
-
-# Start the server in a new thread
-port = 8000
-daemon = threading.Thread(name='daemon_server',
-                          target=start_server,
-                          args=('.', port))
-daemon.setDaemon(True)
-daemon.start()
 
 #     organizer = Manager
 #     fileOrganizer = Content manager
@@ -139,37 +70,25 @@ FOLDER_MIME = 'application/vnd.google-apps.folder'
 SOURCE_FILE = 'empty_file.bin'
 DRIVE_LOG = 'drive_create_log'
 BIN_MIME = "application/octet-stream"
-ACCEPTABLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUYVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
 
 SCOPES = 'https://www.googleapis.com/auth/drive'
 SERVICE_ACCOUNT_FILE = 'service-account.json'
-storage_path = Path('storage.json')
-
 store = file.Storage('storage.json')
-creds = None
-
-if storage_path.is_file():
-    creds = store.get()
-else:
-    print("No storage.json here.")
-
+creds = store.get()
 if not creds or creds.invalid:
     flow = client.flow_from_clientsecrets(
         'client_secrets.json',
         scope=SCOPES,
-        redirect_uri=f"http://{host_ip}:8000/")
+        redirect_uri='http://localhost:8000/oauth2callback')
     auth_uri = flow.step1_get_authorize_url()
-    print('Please go to this URL and sign in: {}'.format(auth_uri))
-
-    with Spinner():
-        while not storage_path.is_file():
-            time.sleep(1)
-
-    creds = store.get()
-
+    print('Please go to this URL: {}'.format(auth_uri))
+    auth_code = input('Enter the authorization code: ')
+    creds = flow.step2_exchange(auth_code)
+    store.put(creds)
 DRIVE = discovery.build('drive', 'v3', http=creds.authorize(Http()))
 
 Path(SOURCE_FILE).touch()
+
 
 def create_td(td_name):
     request_id = str(uuid.uuid4())  # random unique UUID string
