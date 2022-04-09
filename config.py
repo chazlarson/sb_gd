@@ -1,11 +1,8 @@
-prefix = 'hvqnxjxbkh'
+prefix = 'aZaSjsklaj'
 
-group_email = "artisanal-rclone@artisanaltyping.com"
+group_email = "all-sa@bing.bang"
 
-sa_file = "/opt/sa/150.json"
+sa_file = "/opt/sa/all/150.json"
 
 drive_data = {
     'Movies': '/Media/Movies',
-    'Music': '/Media/Music',
-    'TV': '/Media/TV'
-}
