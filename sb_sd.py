@@ -8,6 +8,13 @@ from oauth2client import file
 from pathlib import Path
 from oauth2client import client
 
+if (input("Do you have existing shared drives you are planning to use with Saltbox ? [y/n] ") == "n"):
+    print("well done, continuing...\n\n")
+else:
+    print("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
+    print("https://docs.saltbox.dev/reference/rclone-manual/#existing-rclone-setup")
+    exit()
+
 if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
         input("Have you created the required base project? [y/n] ") == "y" and
         input("Have you created the required Google Group? [y/n] ") == "y" and
