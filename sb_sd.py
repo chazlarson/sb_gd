@@ -56,6 +56,13 @@ if not path.is_file():
     print("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
+path = Path(sa_file)
+
+if not path.is_file():
+    print(f"\n\nThere is no {sa_file} present.")
+    print("You need to either edit this path in the config or copy one of your SA JSON files to that location.")
+    exit()
+
 #     organizer = Manager
 #     fileOrganizer = Content manager
 #     writer = Contributor
