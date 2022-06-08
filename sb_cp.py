@@ -9,6 +9,13 @@ from config import prefix
 from config import drive_data
 from config import sa_file
 
+if prefix == 'aZaSjsklaj':
+    print("\n\nIt doesn't look like you've edited the default config for the script before this one.")
+    print("\nWhich means that the environment this script is assuming does not exist.")
+    print("\nThese scripts are dependent on one another and cannot be run seperately.")
+    print("\nEach one relies on tasks performed by the previous one.")
+    exit()
+
 CLOUDPLOW_PATH = "/opt/cloudplow/"
 
 p = Path(sa_file)
