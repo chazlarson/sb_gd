@@ -96,7 +96,9 @@ if not creds or creds.invalid:
         redirect_uri='http://localhost:8000/oauth2callback')
     auth_uri = flow.step1_get_authorize_url()
     print('Please go to this URL: {}'.format(auth_uri))
-    auth_code = input('Enter the authorization code: ')
+    entire_URL = input('Enter the entire localhost URL: ')
+    items = entire_URL.split('code=')
+    auth_code = items[1]
     creds = flow.step2_exchange(auth_code)
     store.put(creds)
 DRIVE = discovery.build('drive', 'v3', http=creds.authorize(Http()))
