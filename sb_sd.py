@@ -63,6 +63,12 @@ if not path.is_file():
     print("You need to either edit this path in the config or copy one of your SA JSON files to that location.")
     exit()
 
+for dn, mediapath in drive_data.items():
+    if len(dn.split()) > 1:
+        print(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
+        print("Spaces are not allowed in drive names.")
+        exit()
+        
 #     organizer = Manager
 #     fileOrganizer = Content manager
 #     writer = Contributor
