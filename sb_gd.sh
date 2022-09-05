@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "You probably don't want to run this script."
+echo "It's outdated and probably won't work."
+exit
+
 # Assumptions:
 #  1. You have created a google project as described here: https://docs.saltbox.dev/reference/google-project-setup/
 #  2. You have the credential JSON to hand
