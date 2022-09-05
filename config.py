@@ -6,9 +6,13 @@ sa_file = "/opt/sa/150.json"
 
 # `drive name`: '/directory/on/this/drive`
 drive_data = {
+    'Anime': '/Media/Anime',
+    'Books': '/Media/Books',
     'Movies': '/Media/Movies',
+    'Movies-4K': '/Media/Movies-4K',
     'Music': '/Media/Music',
-    'TV': '/Media/TV'
+    'TV': '/Media/TV',
+    'TV-4K': '/Media/TV-4K'
 }
 # Notes on drive naming; this default file uses "Movies", "Music", "TV" just for clarity.
 # The name is totally arbitrary.  The script is going to concatenate the prefix and the name,
