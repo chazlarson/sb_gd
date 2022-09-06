@@ -2,7 +2,7 @@ prefix = 'aZaSjsklaj'
 
 group_email = "all-sa@bing.bang"
 
-sa_file = "/opt/sa/150.json"
+sa_file = "/opt/sa/all/150.json"
 
 # `drive name`: '/directory/on/this/drive`
 drive_data = {
