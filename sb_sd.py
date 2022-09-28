@@ -196,10 +196,10 @@ def create_media_dirs(root_id, mediapath):
             file_present, file_id = file_is_here(folder, True)
             if file_present:
                 fld_id = file_id
-                print(f"** Folder {folder} found, ID {fld_id}")
+                print(f"** Found folder {folder}, ID {fld_id}")
             else:
-                fld_id = create_folder(fld_id, folder)
-                print(f"** Folder {folder} created, ID {fld_id}")
+                file_present, fld_id = create_folder(fld_id, folder)
+                print(f"** Created folder {folder}, ID {fld_id}")
 
 
 def create_bin_file_on_root(folder_id, fn, name):
@@ -218,16 +218,16 @@ def create_flag_files(drivename, td_id):
     folder_name = f"-- {drivename} Shared --"
     created_it, folder_id = create_folder(td_id, folder_name)
     if created_it:
-        print(f"** Found folder {folder_name}, ID {folder_id}")
-    else:
         print(f"** Created folder {folder_name}, ID {folder_id}")
+    else:
+        print(f"** Found folder {folder_name}, ID {folder_id}")
 
     mountfile = drivename.lower().replace(' ', '_') + "_mounted.bin"
     created_it, file_id = create_bin_file_on_root(td_id, SOURCE_FILE, mountfile)
     if created_it:
-        print(f"** Found file {folder_name}, ID {file_id}")
-    else:
         print(f"** Created file {folder_name}, ID {file_id}")
+    else:
+        print(f"** Found file {folder_name}, ID {file_id}")
 
 
 def add_users(td_id):
@@ -299,8 +299,10 @@ for dn, mediapath in drive_data.items():
 
 if len(remote_list) > 0:
     rc_cmd = f"rclone config create google union upstreams \"{remote_list}\""
-    print(rc_cmd)
+    print("Creating rclone union remote 'google':")
+    print(f"rclone remote definition ========")
     os.system(rc_cmd)
+    print(f"\n")
 
 if backup_td_id == "":
     print(f"backup drive {backup_drive} wasn't found.")
