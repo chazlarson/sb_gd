@@ -4,6 +4,13 @@ group_email = "all-sa@bing.bang"
 
 sa_file = "/opt/sa/all/150.json"
 
+backup_drive = "automatic"
+# If this is set  to "automatic", files will be backed up to
+# the last shared drive that the script processes.
+# If you want to put them on a specific drive, enter one of
+# the names from the table below: "Anime", "Books", etc.
+# set it to anything else to disable this.
+
 # `drive name`: '/directory/on/this/drive`
 drive_data = {
     'Anime': '/Media/Anime',
