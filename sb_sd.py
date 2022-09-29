@@ -6,13 +6,17 @@ import socket
 import sys
 import threading
 import subprocess
-
-from apiclient import discovery
-from apiclient.http import MediaFileUpload
-from httplib2 import Http
-from oauth2client import file
 from pathlib import Path
-from oauth2client import client
+
+try:
+    from apiclient import discovery
+    from apiclient.http import MediaFileUpload
+    from httplib2 import Http
+    from oauth2client import file
+    from oauth2client import client
+except ModuleNotFoundError:
+    print("Requirements Error: Requirements are not installed")
+    sys.exit(0)
 
 # ##############################################################
 # handy helper
@@ -247,6 +251,7 @@ def create_rclone_remote(drive_id, name):
         rc_result = subprocess.run(["bash", f"./{SCRIPTFILE}"], stdout=subprocess.PIPE)
         print(f"rclone remote definition ========")
         print(rc_result.stdout.decode('utf-8'))
+        Path(SCRIPTFILE).unlink()
     else:
         print(f"Found existing rclone remote: {name}")
 

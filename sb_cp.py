@@ -10,10 +10,11 @@ from config import drive_data
 from config import sa_file
 
 if prefix == 'aZaSjsklaj':
-    print("\n\nIt doesn't look like you've edited the default config for the script before this one.")
-    print("\nWhich means that the environment this script is assuming does not exist.")
-    print("\nThese scripts are dependent on one another and cannot be run seperately.")
-    print("\nEach one relies on tasks performed by the previous one.")
+    print("\n\nIt doesn't look like you've edited the default config, which means")
+    print("you apparently didn't run the sb_sd.py script before this one.")
+    print("This means that the environment this script is assuming does not exist.")
+    print("These scripts are dependent on one another and cannot be run separately.")
+    print("Each one relies on tasks performed by the previous one.")
     exit()
 
 CLOUDPLOW_PATH = "/opt/cloudplow/"
@@ -41,14 +42,16 @@ first_uploader = list(uploaders.values())[0]
 
 if len(remotes) > 1:
     if prefix in first_key:
-        print("\\n\\nLooks like this script has already been run.")
-        print(f"\nfirst remote key is: [{first_key}], which contains the prefix [{prefix}].")
+        print("\n\nLooks like this script has already been run.")
+        print(f"\nThe first remote key is: [{first_key}], which contains the prefix [{prefix}].")
         exit()
-    print("\\n\\nToo many remotes.")
+    print("\n\nThis doesn't seem like a stock cloudplow config.")
+    print("There is more than one remote already defined.")
     exit()
 
 if first_key != 'google':
-    print("\\n\\nDoesn't seem like a stock cloudplow config.")
+    print("\n\nThis doesn't seem like a stock cloudplow config.")
+    print("The first defined remote is not named 'google'.")
     exit()
 
 data['remotes'] = {}
