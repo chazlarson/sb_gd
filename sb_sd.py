@@ -28,7 +28,10 @@ def _copy(self, target):
 
 Path.copy = _copy
 
-if (input("Do you have existing shared drives you are planning to use with Saltbox ? [y/n] ") == "n"):
+if (input("Do you have existing shared drives you are planning to use with Saltbox? \n\
+This is referring to shared drives that predate your Saltbox installation, \n\
+perhaps from a Cloudbox or PTS install, not shared drives that were created \n\
+by previous runs of this script. [y/n] ") == "n"):
     print("well done, continuing...\n\n")
 else:
     print("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
