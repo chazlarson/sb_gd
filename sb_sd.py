@@ -7,6 +7,7 @@ import sys
 import threading
 import subprocess
 from pathlib import Path
+import yaml
 
 try:
     from apiclient import discovery
@@ -69,6 +70,16 @@ from config import drive_data
 from config import sa_file
 from config import backup_drive
 from config import union_remote
+SETTINGS_FILE = "/srv/git/saltbox/settings.yml"
+
+path = Path("dev-sa.json")
+
+if path.is_file():
+    print(f"\n\nThis is the developer's machine.")
+    print(f"Overriding a couple settings.")
+    SETTINGS_FILE = "./settings.yml"
+    prefix = 'heilung'
+    sa_file = "dev-sa.json"
 
 if prefix == 'aZaSjsklaj':
     print("\n\nIt doesn't look like you've edited the default config.")
@@ -96,6 +107,17 @@ for dn, mediapath in drive_data.items():
         print(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
         print("Spaces are not allowed in drive names.")
         exit()
+
+try:
+    with open(SETTINGS_FILE, "r") as settings:
+        yaml_content = settings.read()
+        settings_obj = yaml.safe_load(yaml_content)
+        union_remote = settings_obj['rclone']['remote']
+        print(f"Found union remote name: '{union_remote}'")
+except:
+    print("Can't find saltbox settings file")
+    print("Defaulting union remote name to '{union_remote}'")
+
 
 print(f"rclone '{union_remote}' remote check ====")
 rc_cmd = f"rclone config show {union_remote}"
@@ -154,13 +176,7 @@ SOURCE_FILE = 'empty_file.bin'
 DRIVE_LOG = 'drive_create_log'
 
 SCOPES = ['https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/drive.appdata']
-# credentials = ServiceAccountCredentials.from_json_keyfile_name('json-file', SCOPES)
-# http=Http()
-# http.redirect_codes = http.redirect_codes - {308}
-# http_auth = credentials.authorize(http)
-# drive_service = build('drive', 'v3', http=http_auth,cache_discovery=False)
 
-SERVICE_ACCOUNT_FILE = 'service-account.json'
 store = file.Storage('storage.json')
 creds = store.get()
 if not creds or creds.invalid:

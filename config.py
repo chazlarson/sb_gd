@@ -49,5 +49,5 @@ drive_data = {
 # rclone:
 #   version: latest
 #   remote: google     <<<<<< THIS ONE HERE
-# change this value to match
+# change this value to match if you are not running on the saltbox machine
 union_remote = 'google'
