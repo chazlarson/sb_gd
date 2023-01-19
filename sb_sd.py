@@ -80,12 +80,29 @@ if path.is_file():
     SETTINGS_FILE = "./settings.yml"
     prefix = 'heilung'
     sa_file = "dev-sa.json"
+    group_email == 'all-sa@dev.testing'
 
 if prefix == 'aZaSjsklaj':
     print("\n\nIt doesn't look like you've edited the default config.")
-    print("See step 4 on this page:")
-    print("https://docs.saltbox.dev/reference/google-shared-drives/")
-    exit()
+    print(f"Prefix is still set to {prefix}")
+    prefix = ""
+    while len(prefix) == 0:
+        prefix = input("Please enter your prefix [or 'q' to quit]: ")
+        if prefix == 'q':
+            print("See step 4 on this page:")
+            print("https://docs.saltbox.dev/reference/google-shared-drives/")
+            exit()
+
+if group_email == 'all-sa@bing.bang':
+    print("\n\nIt doesn't look like you've edited the default config.")
+    print(f"Group email is still set to {group_email}")
+    group_email = ""
+    while len(group_email) == 0:
+        group_email = input("Please enter your group email [or 'q' to quit]: ")
+        if group_email == 'q':
+            print("See step 4 on this page:")
+            print("https://docs.saltbox.dev/reference/google-shared-drives/")
+            exit()
 
 path = Path('client_secrets.json')
 
@@ -105,7 +122,7 @@ if not path.is_file():
 for dn, mediapath in drive_data.items():
     if len(dn.split()) > 1:
         print(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
-        print("Spaces are not allowed in drive names.")
+        print("Spaces are not allowed in drive names in this script.")
         exit()
 
 try:
