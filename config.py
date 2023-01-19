@@ -44,3 +44,10 @@ drive_data = {
 #     '005': '/Media/4KMovies',
 #     '006': '/Media/BadMovies',
 # }
+
+# if you changed this value in /srv/git/saltbox/settings.yml                                                                             in zsh at 17:36:03
+# rclone:
+#   version: latest
+#   remote: google     <<<<<< THIS ONE HERE
+# change this value to match
+union_remote = 'google'

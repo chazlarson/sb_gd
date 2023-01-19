@@ -8,3 +8,6 @@ storage.json
 .idea
 __pycache__
 backup
+.direnv
+.vscode
+tmp.sh

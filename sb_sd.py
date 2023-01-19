@@ -29,9 +29,10 @@ def _copy(self, target):
 Path.copy = _copy
 
 if (input("Do you have an existing GoogleDrive/rclone setup you are planning to use with Saltbox? \n\
-This means anything [drives, rclone remotes, etc] that was not created by this script.  \n\
+This means anything that was not created by this script.  \n\
+[drives, rclone remotes, etc] \n\
 Perhaps you're coming from Cloudbox, or PlexGuide/PTS, or something else. \n\
-If that is true, answer 'y'. [if you ignore this warning, data loss will likely result]\n\
+If that is true, answer 'y'. [if you ignore this warning, data loss will likely result] \n\
 If this is the second time you are running this script, answer 'no'. \n\
 [y/n] ") == "n"):
     print("well done, continuing...\n\n")
@@ -67,6 +68,7 @@ from config import group_email
 from config import drive_data
 from config import sa_file
 from config import backup_drive
+from config import union_remote
 
 if prefix == 'aZaSjsklaj':
     print("\n\nIt doesn't look like you've edited the default config.")
@@ -94,6 +96,37 @@ for dn, mediapath in drive_data.items():
         print(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
         print("Spaces are not allowed in drive names.")
         exit()
+
+print(f"rclone '{union_remote}' remote check ====")
+rc_cmd = f"rclone config show {union_remote}"
+SCRIPTFILE=f"tmp.sh"
+with open(SCRIPTFILE, 'w') as f:
+    f.write(f"#!/bin/bash\n{rc_cmd}\n")
+rc_result = subprocess.run(["bash", f"./{SCRIPTFILE}"], stdout=subprocess.PIPE)
+pieces = rc_result.stdout.decode('utf-8').split('\n')
+for ln in pieces:
+    if 'upstreams' in ln:
+        upstreams = ln
+try:
+    pieces = upstreams.split()
+    b = 0
+    for ln in pieces:
+        if 'upstreams' not in ln and '=' not in ln and prefix not in ln:
+            b += 1
+    if b > 0:
+        print(f"There is an rclone remote called '{union_remote}' that this script did not create.")
+        print("[or it has been altered since this script created it]")
+        print(f"There are {b} elements that do not contain {prefix}")
+        print("This script will overwrite that remote so it is exiting.")
+        print("Rename or delete that remote before trying again.")
+        print("Perhaps this script is not for you.")
+        sys.exit(0)
+    else:
+        print(f"Existing '{union_remote}' remote was created by this script; continuing...")
+except NameError as ex:
+    print(f"No existing '{union_remote}' remote; continuing...")
+
+Path(SCRIPTFILE).unlink()
 
 #     organizer = Manager
 #     fileOrganizer = Content manager
