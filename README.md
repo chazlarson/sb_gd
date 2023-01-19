@@ -12,6 +12,10 @@ Script to set up Google Drive stuff for saltbox/cloudbox
     Probably other python3 works [this was built on a new saltbox install, so the version is whatever that left me with].  The assumption is that I can create a Python virtual env
  1. `/opt` is owned by you and writeable without sudo
 
+## direnv support
+
+There's en `.envrc` that will set up the environment for you if you are using `direnv`.
+
 ## Python versions
 The python version usage is described in the saltbox docs: https://docs.saltbox.dev/reference/google-shared-drives/
 
@@ -20,6 +24,34 @@ The python version usage is described in the saltbox docs: https://docs.saltbox.
 `sb_cp.py` - adjusts stock Cloudplow config files for these shared drives and service accounts.
 
 `sb_pas.py` - adjusts stock Plex Autoscan config file for these shared drives.
+
+## what does sb_sd.py do?
+
+  1. Asks some questions to make sure you've done the required stuff
+
+     It's pointless to lie here since the script will just error later.
+
+  1. Read config.py
+
+     Gets prefix and various other pieces.
+
+  1. Grabs union remote name from settings
+
+  1. Makes sure that any remote by that name came form this script
+
+  1. Creates shared drives with expected file systems
+
+  1. Add service accounts to the google group you specify
+
+  1. Add Google group to shared drives as Manager
+
+  1. Create rclone remotes for the shared drives
+
+     These are authenticated with a service account file, all using `/opt/sa/all/150.json`
+
+  1. Create or update rclone union remote combining the shared drives
+
+  1. Zip up all work product and upload to one of the shared drives for backup.
 
 ## sb_gd.sh
 
