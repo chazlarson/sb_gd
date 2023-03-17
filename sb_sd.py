@@ -6,6 +6,7 @@ import socket
 import sys
 import threading
 import subprocess
+import time
 from pathlib import Path
 import yaml
 
@@ -19,6 +20,14 @@ except ModuleNotFoundError:
     print("Requirements Error: Requirements are not installed")
     sys.exit(0)
 
+def countdown(time_sec):
+    while time_sec:
+        mins, secs = divmod(time_sec, 60)
+        timeformat = '{:02d}:{:02d}'.format(mins, secs)
+        print(timeformat, end='\r')
+        time.sleep(1)
+        time_sec -= 1
+
 # ##############################################################
 # handy helper
 # ##############################################################
@@ -29,29 +38,52 @@ def _copy(self, target):
 
 Path.copy = _copy
 
-if (input("Do you have an existing GoogleDrive/rclone setup you are planning to use with Saltbox? \n\
-This means anything that was not created by this script.  \n\
-[drives, rclone remotes, etc] \n\
-Perhaps you're coming from Cloudbox, or PlexGuide/PTS, or something else. \n\
-If that is true, answer 'y'. [if you ignore this warning, data loss will likely result] \n\
-If this is the second time you are running this script, answer 'no'. \n\
-[y/n] ") == "n"):
-    print("well done, continuing...\n\n")
-else:
-    print("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
-    print("https://docs.saltbox.dev/reference/rclone-manual/#existing-rclone-setup")
+CONFIG_FILE = 'config.py'
+CONFIG_TEMPLATE = 'config.py.example'
+
+config_file = Path(CONFIG_FILE)
+
+if not config_file.is_file():
+    print("\n\nThere is no config.py here.")
+    template = Path(CONFIG_TEMPLATE)
+    print("Creating config file...")
+    template.copy(config_file)
+    print("Please edit config.py to suit and run this script again.")
     exit()
 
-if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
-        input("Have you created the required base project? [y/n] ") == "y" and
-        input("Have you created the required Google Group? [y/n] ") == "y" and
-        input("Have you installed the gcloud SDK tools? [y/n] ") == "y" and
-        input("Have you created the expected projects and service accounts? [y/n] ") == "y"):
-    print("well done, continuing...\n\n")
+DRIVE_LOG = 'drive_create_log'
+
+path = Path(DRIVE_LOG)
+
+if path.is_file():
+    if (input("ATTENTION: THIS QUESTION HAS CHANGED; PLEASE READ IT. \n\
+    This script is intended for users who: \n\n\
+    1. Have never used Google Drive in a media server context like this AND/OR\n\
+    2. Have no media already on Google Drives that they want to use with Saltbox.  \n\n\
+    If this is you, answer 'y'.\n\
+    [y/n] ") == "y"):
+        print("well done, continuing...\n\n")
+    else:
+        print("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
+        print("https://docs.saltbox.dev/reference/rclone-manual/#existing-rclone-setup")
+        exit()
+
+    if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
+            input("Have you created the required base project? [y/n] ") == "y" and
+            input("Have you created the required Google Group? [y/n] ") == "y" and
+            input("Have you installed the gcloud SDK tools? [y/n] ") == "y" and
+            input("Have you created the expected projects and service accounts? [y/n] ") == "y"):
+        print("well done, continuing...\n\n")
+    else:
+        print("\n\nSee details here and come back when steps 1-5 are completed")
+        print("https://docs.saltbox.dev/reference/rclone-manual/")
+        exit()
 else:
-    print("\n\nSee details here and come back when steps 1-5 are completed")
-    print("https://docs.saltbox.dev/reference/rclone-manual/")
-    exit()
+    print("\n\nIt looks like you have run this script before.")
+    print(f"Because of this, the introductory questions were skipped.")
+    print(f"Hit control-C in the next few seconds to cancel.")
+    countdown(10)
+    print(f"Continuing...")
 
 # ##############################################################
 # You need to install the Google API stuff
@@ -156,7 +188,8 @@ try:
         print(f"There is an rclone remote called '{union_remote}' that this script did not create.")
         print("[or it has been altered since this script created it]")
         print(f"There are {b} elements that do not contain {prefix}")
-        print("This script will overwrite that remote so it is exiting.")
+        print("This script would overwrite that remote.")
+        print("To avoid that, the script is exiting.")
         print("Rename or delete that remote before trying again.")
         print("Perhaps this script is not for you.")
         sys.exit(0)
@@ -190,7 +223,6 @@ FILE_MIME = 'application/vnd.google-apps.file'
 ZIP_MIME = 'application/zip'
 
 SOURCE_FILE = 'empty_file.bin'
-DRIVE_LOG = 'drive_create_log'
 
 SCOPES = ['https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/drive.appdata']
 
