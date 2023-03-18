@@ -2,6 +2,7 @@ from __future__ import print_function
 import uuid
 import os
 import shutil
+import logging
 import socket
 import sys
 import threading
@@ -16,9 +17,12 @@ try:
     from httplib2 import Http
     from oauth2client import file
     from oauth2client import client
-except ModuleNotFoundError:
-    print("Requirements Error: Requirements are not installed")
+except ModuleNotFoundError as me:
+    console_and_log(f"Requirements Error: Requirements are not installed")
+    console_and_log(f"Specifically: {me.msg}")
     sys.exit(0)
+
+VERSION = "0.5"
 
 def countdown(time_sec):
     while time_sec:
@@ -38,34 +42,51 @@ def _copy(self, target):
 
 Path.copy = _copy
 
+SCRIPT_NAME = Path(__file__).stem
+
+logging.basicConfig(
+    filename=f"{SCRIPT_NAME}.log",
+    filemode="w",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+
+def console_and_log(msg):
+    logging.info(msg.strip())
+    print(msg)
+    
+console_and_log(f"Starting {SCRIPT_NAME} {VERSION}")
+
 CONFIG_FILE = 'config.py'
 CONFIG_TEMPLATE = 'config.py.example'
 
 config_file = Path(CONFIG_FILE)
 
 if not config_file.is_file():
-    print("\n\nThere is no config.py here.")
+    console_and_log("\n\nThere is no config.py here.")
     template = Path(CONFIG_TEMPLATE)
-    print("Creating config file...")
+    console_and_log("Creating config file...")
     template.copy(config_file)
-    print("Please edit config.py to suit and run this script again.")
+    console_and_log("Please edit config.py to suit and run this script again.")
     exit()
 
 DRIVE_LOG = 'drive_create_log'
 
 path = Path(DRIVE_LOG)
 
-if path.is_file():
+if not path.is_file():
+    logging.info("Verifying prerequisites")
     if (input("ATTENTION: THIS QUESTION HAS CHANGED; PLEASE READ IT. \n\
     This script is intended for users who: \n\n\
     1. Have never used Google Drive in a media server context like this AND/OR\n\
     2. Have no media already on Google Drives that they want to use with Saltbox.  \n\n\
     If this is you, answer 'y'.\n\
     [y/n] ") == "y"):
-        print("well done, continuing...\n\n")
+        console_and_log("well done, continuing...\n\n")
     else:
-        print("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
-        print("https://docs.saltbox.dev/reference/rclone-manual/#existing-rclone-setup")
+        logging.info("User answered No to question 1")
+        console_and_log("\n\nYou don't want to use this script. Go here and read the 'Existing Rclone Setup' section")
+        console_and_log("https://docs.saltbox.dev/reference/rclone-manual/#existing-rclone-setup")
         exit()
 
     if (input("Have you verified drive permissions on your google account? [y/n] ") == "y" and
@@ -73,17 +94,18 @@ if path.is_file():
             input("Have you created the required Google Group? [y/n] ") == "y" and
             input("Have you installed the gcloud SDK tools? [y/n] ") == "y" and
             input("Have you created the expected projects and service accounts? [y/n] ") == "y"):
-        print("well done, continuing...\n\n")
+        console_and_log("well done, continuing...\n\n")
     else:
-        print("\n\nSee details here and come back when steps 1-5 are completed")
-        print("https://docs.saltbox.dev/reference/rclone-manual/")
+        console_and_log("\n\nSee details here and come back when steps 1-5 are completed")
+        console_and_log("https://docs.saltbox.dev/reference/rclone-manual/")
         exit()
 else:
-    print("\n\nIt looks like you have run this script before.")
-    print(f"Because of this, the introductory questions were skipped.")
-    print(f"Hit control-C in the next few seconds to cancel.")
+    console_and_log(f"\n\nIt looks like you have run this script before.")
+    console_and_log(f"{DRIVE_LOG} is here.")
+    console_and_log(f"Because of this, the introductory questions were skipped.")
+    console_and_log(f"Hit control-C in the next few seconds to cancel.")
     countdown(10)
-    print(f"Continuing...")
+    console_and_log(f"Continuing...")
 
 # ##############################################################
 # You need to install the Google API stuff
@@ -107,54 +129,57 @@ SETTINGS_FILE = "/srv/git/saltbox/settings.yml"
 path = Path("dev-sa.json")
 
 if path.is_file():
-    print(f"\n\nThis is the developer's machine.")
-    print(f"Overriding a couple settings.")
+    console_and_log(f"\n\nThis is the developer's machine.")
+    console_and_log(f"Overriding a couple settings.")
     SETTINGS_FILE = "./settings.yml"
     prefix = 'heilung'
     sa_file = "dev-sa.json"
     group_email == 'all-sa@dev.testing'
 
 if prefix == 'aZaSjsklaj':
-    print("\n\nIt doesn't look like you've edited the default config.")
-    print(f"Prefix is still set to {prefix}")
+    console_and_log("\n\nIt doesn't look like you've edited the default config.")
+    console_and_log(f"Prefix is still set to {prefix}")
     prefix = ""
     while len(prefix) == 0:
         prefix = input("Please enter your prefix [or 'q' to quit]: ")
         if prefix == 'q':
-            print("See step 4 on this page:")
-            print("https://docs.saltbox.dev/reference/google-shared-drives/")
+            console_and_log("See step 4 on this page:")
+            console_and_log("https://docs.saltbox.dev/reference/google-shared-drives/")
             exit()
+        console_and_log(f"Continuing with prefix: {prefix}")
+        
 
 if group_email == 'all-sa@bing.bang':
-    print("\n\nIt doesn't look like you've edited the default config.")
-    print(f"Group email is still set to {group_email}")
+    console_and_log("\n\nIt doesn't look like you've edited the default config.")
+    console_and_log(f"Group email is still set to {group_email}")
     group_email = ""
     while len(group_email) == 0:
         group_email = input("Please enter your group email [or 'q' to quit]: ")
         if group_email == 'q':
-            print("See step 4 on this page:")
-            print("https://docs.saltbox.dev/reference/google-shared-drives/")
+            console_and_log("See step 4 on this page:")
+            console_and_log("https://docs.saltbox.dev/reference/google-shared-drives/")
             exit()
+        console_and_log(f"Continuing with group email: {group_email}")
 
 path = Path('client_secrets.json')
 
 if not path.is_file():
-    print("\n\nThere is no client_secrets.json here.")
-    print("See step 5 on this page:")
-    print("https://docs.saltbox.dev/reference/google-shared-drives/")
+    console_and_log("\n\nThere is no client_secrets.json here.")
+    console_and_log("See step 5 on this page:")
+    console_and_log("https://docs.saltbox.dev/reference/google-shared-drives/")
     exit()
 
 path = Path(sa_file)
 
 if not path.is_file():
-    print(f"\n\nThere is no {sa_file} present.")
-    print("You need to either edit this path in the config or copy one of your SA JSON files to that location.")
+    console_and_log(f"\n\nThere is no {sa_file} present.")
+    console_and_log("You need to either edit this path in the config or copy one of your SA JSON files to that location.")
     exit()
 
 for dn, mediapath in drive_data.items():
     if len(dn.split()) > 1:
-        print(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
-        print("Spaces are not allowed in drive names in this script.")
+        console_and_log(f"\n\nYou've got a drive name defined that contains spaces: [{dn}].")
+        console_and_log("Spaces are not allowed in drive names in this script.")
         exit()
 
 try:
@@ -162,13 +187,13 @@ try:
         yaml_content = settings.read()
         settings_obj = yaml.safe_load(yaml_content)
         union_remote = settings_obj['rclone']['remote']
-        print(f"Found union remote name: '{union_remote}'")
+        console_and_log(f"Found union remote name: '{union_remote}'")
 except:
-    print("Can't find saltbox settings file")
-    print("Defaulting union remote name to '{union_remote}'")
+    console_and_log("Can't find saltbox settings file")
+    console_and_log("Defaulting union remote name to '{union_remote}'")
 
 
-print(f"rclone '{union_remote}' remote check ====")
+console_and_log(f"rclone '{union_remote}' remote check ====")
 rc_cmd = f"rclone config show {union_remote}"
 SCRIPTFILE=f"tmp.sh"
 with open(SCRIPTFILE, 'w') as f:
@@ -185,18 +210,18 @@ try:
         if 'upstreams' not in ln and '=' not in ln and prefix not in ln:
             b += 1
     if b > 0:
-        print(f"There is an rclone remote called '{union_remote}' that this script did not create.")
-        print("[or it has been altered since this script created it]")
-        print(f"There are {b} elements that do not contain {prefix}")
-        print("This script would overwrite that remote.")
-        print("To avoid that, the script is exiting.")
-        print("Rename or delete that remote before trying again.")
-        print("Perhaps this script is not for you.")
+        console_and_log(f"There is an rclone remote called '{union_remote}' that this script did not create.")
+        console_and_log("[or it has been altered since this script created it]")
+        console_and_log(f"There are {b} elements that do not contain {prefix}")
+        console_and_log("This script would overwrite that remote.")
+        console_and_log("To avoid that, the script is exiting.")
+        console_and_log("Rename or delete that remote before trying again.")
+        console_and_log("Perhaps this script is not for you.")
         sys.exit(0)
     else:
-        print(f"Existing '{union_remote}' remote was created by this script; continuing...")
+        console_and_log(f"Existing '{union_remote}' remote was created by this script; continuing...")
 except NameError as ex:
-    print(f"No existing '{union_remote}' remote; continuing...")
+    console_and_log(f"No existing '{union_remote}' remote; continuing...")
 
 Path(SCRIPTFILE).unlink()
 
@@ -234,7 +259,7 @@ if not creds or creds.invalid:
         scope=SCOPES,
         redirect_uri='http://localhost:8000/oauth2callback')
     auth_uri = flow.step1_get_authorize_url()
-    print('Please go to this URL: {}'.format(auth_uri))
+    console_and_log('Please go to this URL: {}'.format(auth_uri))
     entire_URL = input('Enter the entire localhost URL: ')
     items = entire_URL.split('code=')
     auth_code = items[1]
@@ -303,10 +328,10 @@ def create_media_dirs(root_id, mediapath):
             file_present, file_id = file_is_here(folder, True)
             if file_present:
                 fld_id = file_id
-                print(f"** Found folder {folder}, ID {fld_id}")
+                console_and_log(f"** Found folder {folder}, ID {fld_id}")
             else:
                 file_present, fld_id = create_folder(fld_id, folder)
-                print(f"** Created folder {folder}, ID {fld_id}")
+                console_and_log(f"** Created folder {folder}, ID {fld_id}")
 
 
 def create_bin_file_on_root(folder_id, fn, name):
@@ -325,38 +350,38 @@ def create_flag_files(drivename, td_id):
     folder_name = f"-- {drivename} Shared --"
     created_it, folder_id = create_folder(td_id, folder_name)
     if created_it:
-        print(f"** Created folder {folder_name}, ID {folder_id}")
+        console_and_log(f"** Created folder {folder_name}, ID {folder_id}")
     else:
-        print(f"** Found folder {folder_name}, ID {folder_id}")
+        console_and_log(f"** Found folder {folder_name}, ID {folder_id}")
 
     mountfile = drivename.lower().replace(' ', '_') + "_mounted.bin"
     created_it, file_id = create_bin_file_on_root(td_id, SOURCE_FILE, mountfile)
     if created_it:
-        print(f"** Created file {folder_name}, ID {file_id}")
+        console_and_log(f"** Created file {folder_name}, ID {file_id}")
     else:
-        print(f"** Found file {folder_name}, ID {file_id}")
+        console_and_log(f"** Found file {folder_name}, ID {file_id}")
 
 
 def add_users(td_id):
     for key in user_emails_with_roles:
         role = user_emails_with_roles[key]
         perm_id = add_user(td_id, key, role)
-        print(f"** user {key} set as {role}, ID: {perm_id}")
+        console_and_log(f"** user {key} set as {role}, ID: {perm_id}")
 
 
 def create_rclone_remote(drive_id, name):
     if name not in current_remotes:
         rc_cmd = f"rclone config create {name} drive scope=drive service_account_file={sa_file} team_drive={drive_id}"
-        print(f"Creating rclone remote: {name}")
+        console_and_log(f"Creating rclone remote: {name}")
         SCRIPTFILE=f"{name}.sh"
         with open(SCRIPTFILE, 'w') as f:
             f.write(f"#!/bin/bash\n{rc_cmd}\n")
         rc_result = subprocess.run(["bash", f"./{SCRIPTFILE}"], stdout=subprocess.PIPE)
-        print(f"rclone remote definition ========")
-        print(rc_result.stdout.decode('utf-8'))
+        console_and_log(f"rclone remote definition ========")
+        console_and_log(rc_result.stdout.decode('utf-8'))
         Path(SCRIPTFILE).unlink()
     else:
-        print(f"Found existing rclone remote: {name}")
+        console_and_log(f"Found existing rclone remote: {name}")
 
 remote_list = ""
 backup_td_id = ""
@@ -374,14 +399,14 @@ for dn, mediapath in drive_data.items():
     if len(response.get('drives')) == 0:
         # no teamdrive by this name
         td_id = create_td(drivename)
-        print(f"** Team Drive {drivename} created, ID: {td_id}")
+        console_and_log(f"** Team Drive {drivename} created, ID: {td_id}")
         with open(DRIVE_LOG, 'a') as f:
             f.write(f"{drivename}|{td_id}\n")
     else:
         for drive in response.get('drives', []):
             drivename = drive.get('name')
             td_id = drive.get('id')
-            print(f"Found shared drive: {drivename} ({td_id})")
+            console_and_log(f"Found shared drive: {drivename} ({td_id})")
 
     drive_contents = DRIVE.files().list(q="trashed=false", includeItemsFromAllDrives=True, teamDriveId=td_id, corpora='drive', supportsAllDrives=True).execute()
 
@@ -407,21 +432,21 @@ for dn, mediapath in drive_data.items():
 
 if len(remote_list) > 0:
     rc_cmd = f"rclone config create google union upstreams \"{remote_list}\""
-    print("Creating rclone union remote 'google':")
-    print(f"rclone remote definition ========")
+    console_and_log("Creating rclone union remote 'google':")
+    console_and_log(f"rclone remote definition ========")
     os.system(rc_cmd)
-    print(f"\n")
+    console_and_log(f"\n")
 
 if backup_td_id == "":
-    print(f"backup drive {backup_drive} wasn't found.")
-    print(f"backup will be skipped.")
+    console_and_log(f"backup drive {backup_drive} wasn't found.")
+    console_and_log(f"backup will be skipped.")
 else:
     sa_backup = Path('backup/sa')
     if sa_backup.parent.exists():
-        print("Deleting previous backup files...")
+        console_and_log("Deleting previous backup files...")
         shutil.rmtree(sa_backup.parent)
 
-    print("Preparing backup files...")
+    console_and_log("Preparing backup files...")
     # back up the stuff we created
     shutil.copytree(Path('/opt/sa/all/'), sa_backup)
     rclone_conf = Path(f"{Path.home()}/.config/rclone/rclone.conf")
@@ -430,7 +455,7 @@ else:
     Path('./storage.json').copy(sa_backup.parent)
     Path(DRIVE_LOG).copy(sa_backup.parent)
 
-    print("Creating backup archive...")
+    console_and_log("Creating backup archive...")
     shutil.make_archive("sb_sd_artifacts", 'zip', sa_backup.parent)
     backupzip = Path('sb_sd_artifacts.zip')
 
@@ -439,15 +464,15 @@ else:
         # Add all the writable properties you want the file to have in the body!
         body = {"name": upload_filename, "parents": [parent_id]}
         request = drive_service.files().create(body=body, media_body=media, supportsAllDrives=True).execute()
-        print("Upload Complete!")
+        console_and_log("Upload Complete!")
 
 
     folder_id = create_folder(backup_td_id, 'saltbox_sd_backup')
 
     # Upload file
-    print(f"Uploading backup archive to {backup_td_name}/saltbox_sd_backup...")
+    console_and_log(f"Uploading backup archive to {backup_td_name}/saltbox_sd_backup...")
     upload_file(DRIVE, 'sb_sd_artifacts.zip', ZIP_MIME, 'backup.zip', folder_id)
     backupzip.unlink()
 
 
-print(f"All done.")
+console_and_log(f"All done.")
