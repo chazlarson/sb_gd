@@ -37,7 +37,7 @@ The python version usage is described in the saltbox docs: https://docs.saltbox.
 
   1. Grabs union remote name from settings
 
-  1. Makes sure that any remote by that name came form this script
+  1. Makes sure that any remote by that name looks like it came from this script
 
   1. Creates shared drives with expected file systems
 
